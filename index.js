@@ -11,6 +11,7 @@ app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { application } = require('express');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.quaequt.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -18,6 +19,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
             const postCollection = client.db("endgame").collection("posts");
+            const engadgeCollection = client.db("endgame").collection("comments");
+            const userCollection = client.db("endgame").collection("users");
 
             app.post("/posts",async(req,res)=>{
                 const post = req.body;
@@ -27,7 +30,7 @@ async function run(){
 
             app.get("/posts",async(req,res)=>{
                 const query = {};
-                const posts = await postCollection.find(query).toArray();
+                const posts = await postCollection.find(query,{"_id":1}).sort({_id:-1}).toArray();
                 res.send(posts);
             })
 
@@ -35,6 +38,39 @@ async function run(){
                 const id = req.params.id;
                 const query = {_id: ObjectId(id)};
                 const result = await postCollection.findOne(query);
+                res.send(result)
+            })
+
+            app.post("/comments",async(req,res) =>{
+                const comment = req.body;
+                const result = await engadgeCollection.insertOne(comment)
+                res.send(result)
+            })
+            // app.post("/comments",async(req,res) =>{
+            //     const comment = req.body;
+            //     const result = await postCollection.insertOne(comment)
+            //     res.send(result)
+            // })
+            app.get("/comments",async(req,res) =>{
+                const query = {};
+                const comments = await engadgeCollection.find(query).toArray();
+                res.send(comments);
+            })
+
+            app.post("/users",async(req,res)=>{
+                const user = req.body;
+                const result = await userCollection.insertOne(user);
+                res.send(result);
+              })
+
+            //   app.get("/users/:id",async(req,res)=>{
+
+            //   })
+
+            app.get("/users",async(req,res)=>{
+                const email = req.query.email;
+                const query = {email:email}
+                const result = await userCollection.find(query).toArray();
                 res.send(result)
             })
     }
