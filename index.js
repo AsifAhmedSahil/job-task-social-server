@@ -48,6 +48,11 @@ async function run(){
             })
             // app.post("/comments",async(req,res) =>{
             //     const comment = req.body;
+            //     const result = await engadgeCollection.insertOne(comment)
+            //     res.send(result)
+            // })
+            // app.post("/comments",async(req,res) =>{
+            //     const comment = req.body;
             //     const result = await postCollection.insertOne(comment)
             //     res.send(result)
             // })
@@ -63,9 +68,38 @@ async function run(){
                 res.send(result);
               })
 
-            //   app.get("/users/:id",async(req,res)=>{
+            app.put("/users/:id",async(req,res) =>{
+                const id = req.params.id;
+                const filter = {_id:ObjectId(id)};
+                const user = req.body;
+                const option = {upsert: true}
+                const updatedUser = {
+                    $set: {
+                        name: user.name,
+                        address:user.address,
+                        university:user.university,
+                        email:user.email
+                    }
+                }
+                const result = await userCollection.updateOne(filter,updatedUser,option)
+                // console.log(updateUser)
+                res.send(result);
+            } )
 
-            //   })
+            app.patch("/posts/:id",async(req,res) =>{
+                const id = req.params.id;
+                const likequantity = req.body
+                const filter = {_id:ObjectId(id)};
+                const option = {upsert: true}
+                const updatedDoc = {
+                    $set: {
+                        like:"Like"
+                    }
+                }
+
+                const result = await postCollection.updateOne(filter,updatedDoc,option)
+                res.send(result)
+            })
 
             app.get("/users",async(req,res)=>{
                 const email = req.query.email;
